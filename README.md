@@ -3,9 +3,9 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 -- --- UI WINDOW ---
 local Window = Rayfield:CreateWindow({
    Name = "🎯DAVI7 Internal",
-   LoadingTitle = "DAVI7 AIM🎯",
+   LoadingTitle = "DAVI7 Internal Abrindo...🎯",
    LoadingSubtitle = "CRIADO POR DAVI7",
-   ConfigurationSaving = { Enabled = false }
+   ConfigurationSaving = { Enabled = true }
 })
 
 local AimTab = Window:CreateTab("Combat (Aim)", 4483362458)
