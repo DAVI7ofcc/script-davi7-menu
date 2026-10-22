@@ -2,8 +2,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- --- UI WINDOW ---
 local Window = Rayfield:CreateWindow({
-   Name = "🎯DAVI7 Internal",
-   LoadingTitle = "DAVI7 Internal Abrindo...🎯",
+   Name = "🌠DAVI7 Internal",
+   LoadingTitle = "🌠DAVI7 Internal Abrindo...",
    LoadingSubtitle = "CRIADO POR DAVI7",
    ConfigurationSaving = { Enabled = false }
 })
