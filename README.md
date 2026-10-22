@@ -211,6 +211,24 @@ end)
 -- =======================
 local espObjects = {}
 
+
+MainTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Callback = function(v)
+        espEnabled = v
+        if v then
+            for _,plr in pairs(Players:GetPlayers()) do
+                createESP(plr)
+            end
+        else
+            removeESP()
+        end
+   end,
+})
+
+
+
 local function createESP(plr)
     if plr == player then return end
 
@@ -457,22 +475,6 @@ VisTab:CreateColorPicker({
     Name = "Visual Color",
     Color = Color3.fromRGB(255, 0, 0),
     Callback = function(v) Settings.ESPColor = v end
-})
-
-
-MainTab:CreateToggle({
-   Name = "ESP",
-   CurrentValue = false,
-   Callback = function(v)
-        espEnabled = v
-        if v then
-            for _,plr in pairs(Players:GetPlayers()) do
-                createESP(plr)
-            end
-        else
-            removeESP()
-        end
-   end,
 })
 
 
