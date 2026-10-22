@@ -211,24 +211,6 @@ end)
 -- =======================
 local espObjects = {}
 
-
-MainTab:CreateToggle({
-   Name = "ESP",
-   CurrentValue = false,
-   Callback = function(v)
-        espEnabled = v
-        if v then
-            for _,plr in pairs(Players:GetPlayers()) do
-                createESP(plr)
-            end
-        else
-            removeESP()
-        end
-   end,
-})
-
-
-
 local function createESP(plr)
     if plr == player then return end
 
@@ -292,10 +274,10 @@ MainTab:CreateToggle({
 MainTab:CreateToggle({
    Name = "Noclip",
    CurrentValue = false,
-MainTab:CreateToggle({
    Callback = function(v) noclip = v end,
 })
 
+MainTab:CreateToggle({
    Name = "Godmode",
    CurrentValue = false,
    Callback = function(v) godmode = v end,
@@ -307,6 +289,20 @@ MainTab:CreateToggle({
    Callback = function(v) infiniteJump = v end,
 })
 
+MainTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Callback = function(v)
+        espEnabled = v
+        if v then
+            for _,plr in pairs(Players:GetPlayers()) do
+                createESP(plr)
+            end
+        else
+            removeESP()
+        end
+   end,
+})
 
 MainTab:CreateSlider({
    Name = "Fly Speed",
@@ -324,6 +320,11 @@ MainTab:CreateSlider({
    Callback = function(v) walkspeed = v end,
 })
 
+Rayfield:Notify({
+   Title = "Loaded!",
+   Content = "Infinite Jump & ESP Added",
+   Duration = 6,
+})
 
 
 -- --- ABA SEGURANÇA ---
