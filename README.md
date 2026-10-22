@@ -79,11 +79,7 @@ MainTab:CreateToggle({
    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Pulo Infinito",
-   CurrentValue = false,
-   Callback = function(Value) InfiniteJumpEnabled = Value end,
-})
+
 
 --// SERVICES
 local Players = game:GetService("Players")
@@ -278,10 +274,10 @@ MainTab:CreateToggle({
 MainTab:CreateToggle({
    Name = "Noclip",
    CurrentValue = false,
+MainTab:CreateToggle({
    Callback = function(v) noclip = v end,
 })
 
-MainTab:CreateToggle({
    Name = "Godmode",
    CurrentValue = false,
    Callback = function(v) godmode = v end,
@@ -293,20 +289,6 @@ MainTab:CreateToggle({
    Callback = function(v) infiniteJump = v end,
 })
 
-MainTab:CreateToggle({
-   Name = "ESP",
-   CurrentValue = false,
-   Callback = function(v)
-        espEnabled = v
-        if v then
-            for _,plr in pairs(Players:GetPlayers()) do
-                createESP(plr)
-            end
-        else
-            removeESP()
-        end
-   end,
-})
 
 MainTab:CreateSlider({
    Name = "Fly Speed",
@@ -476,6 +458,23 @@ VisTab:CreateColorPicker({
     Color = Color3.fromRGB(255, 0, 0),
     Callback = function(v) Settings.ESPColor = v end
 })
+
+
+MainTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Callback = function(v)
+        espEnabled = v
+        if v then
+            for _,plr in pairs(Players:GetPlayers()) do
+                createESP(plr)
+            end
+        else
+            removeESP()
+        end
+   end,
+})
+
 
 -- --- CORE LOGIK ---
 
