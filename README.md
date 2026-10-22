@@ -5,7 +5,7 @@ local Window = Rayfield:CreateWindow({
    Name = "🎯DAVI7 Internal",
    LoadingTitle = "DAVI7 Internal Abrindo...🎯",
    LoadingSubtitle = "CRIADO POR DAVI7",
-   ConfigurationSaving = { Enabled = true }
+   ConfigurationSaving = { Enabled = false }
 })
 
 local AimTab = Window:CreateTab("Combat (Aim)", 4483362458)
