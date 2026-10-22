@@ -22,7 +22,7 @@ local AntiVoidEnabled = false
 local TargetLockEnabled = false
 
 -- --- ABA PRINCIPAL (MOVIMENTAÇÃO) ---
-local MainTab = Window:CreateTab("Principal", 4483362458)
+local MainTab = Window:CreateTab("Velocidade etc...", 4483362458)
 
 MainTab:CreateSection("Boost de Velocidade")
 
@@ -85,37 +85,246 @@ MainTab:CreateToggle({
    Callback = function(Value) InfiniteJumpEnabled = Value end,
 })
 
--- --- ABA COMBATE ---
-local CombatTab = Window:CreateTab("Combate", 4483362458)
+--// SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
-CombatTab:CreateToggle({
-   Name = "linha + ESP",
+--// VARIABLES
+local flying = false
+local speed = 2
+local noclip = false
+local godmode = false
+local walkspeed = 16
+local infiniteJump = false
+local espEnabled = false
+
+--// CHARACTER
+local function getChar()
+    return player.Character or player.CharacterAdded:Wait()
+end
+
+-- =======================
+-- FLY
+-- =======================
+local bv, bg
+
+local function startFly()
+    local character = getChar()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
+
+    bv = Instance.new("BodyVelocity")
+    bg = Instance.new("BodyGyro")
+
+    bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+    bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+
+    bv.Parent = hrp
+    bg.Parent = hrp
+
+    humanoid.PlatformStand = true
+    flying = true
+
+    RunService.RenderStepped:Connect(function()
+        if not flying then
+            if bv then bv:Destroy() end
+            if bg then bg:Destroy() end
+            humanoid.PlatformStand = false
+            return
+        end
+
+        local cam = workspace.CurrentCamera
+        local move = Vector3.zero
+
+        if UIS:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then move -= Vector3.new(0,1,0) end
+
+        bv.Velocity = move * (speed * 50)
+        bg.CFrame = cam.CFrame
+    end)
+end
+
+local function stopFly()
+    flying = false
+end
+
+-- =======================
+-- NOCLIP
+-- =======================
+RunService.Stepped:Connect(function()
+    if noclip and player.Character then
+        for _,v in pairs(player.Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- =======================
+-- GODMODE
+-- =======================
+RunService.Heartbeat:Connect(function()
+    if godmode then
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = hum.MaxHealth
+            end
+        end
+    end
+end)
+
+-- =======================
+-- WALKSPEED
+-- =======================
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = walkspeed
+        end
+    end
+end)
+
+-- =======================
+-- INFINITE JUMP
+-- =======================
+UIS.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+end)
+
+-- =======================
+-- ESP
+-- =======================
+local espObjects = {}
+
+local function createESP(plr)
+    if plr == player then return end
+
+    local function addChar(char)
+        local highlight = Instance.new("Highlight")
+        highlight.FillTransparency = 1
+        highlight.OutlineColor = Color3.fromRGB(255,0,0)
+        highlight.OutlineTransparency = 0
+        highlight.Adornee = char
+        highlight.Parent = char
+
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0,100,0,40)
+        billboard.AlwaysOnTop = true
+        billboard.StudsOffset = Vector3.new(0,3,0)
+
+        local name = Instance.new("TextLabel")
+        name.Size = UDim2.new(1,0,1,0)
+        name.BackgroundTransparency = 1
+        name.TextColor3 = Color3.new(1,1,1)
+        name.TextStrokeTransparency = 0
+        name.Text = plr.Name
+        name.Parent = billboard
+
+        billboard.Parent = char:WaitForChild("Head")
+
+        espObjects[plr] = {highlight, billboard}
+    end
+
+    if plr.Character then
+        addChar(plr.Character)
+    end
+
+    plr.CharacterAdded:Connect(addChar)
+end
+
+local function removeESP()
+    for _,objs in pairs(espObjects) do
+        for _,o in pairs(objs) do
+            if o then o:Destroy() end
+        end
+    end
+    espObjects = {}
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    if espEnabled then
+        createESP(plr)
+    end
+end)
+
+-- =======================
+-- UI
+-- =======================
+MainTab:CreateToggle({
+   Name = "Fly",
    CurrentValue = false,
-   Callback = function(Value) LineEspEnabled = Value end,
+   Callback = function(v) if v then startFly() else stopFly() end end,
 })
 
-local AimbotGuiObj = nil
-CombatTab:CreateToggle({
-   Name = "Ativar Botão Aimbot",
+MainTab:CreateToggle({
+   Name = "Noclip",
    CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-         local Button = Instance.new("TextButton", ScreenGui)
-         local UICorner = Instance.new("UICorner", Button)
-         AimbotGuiObj = ScreenGui
-         Button.Size = UDim2.new(0, 70, 0, 70); Button.Position = UDim2.new(0.5, -35, 0.5, -35); Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Button.Text = "OFF"; Button.TextColor3 = Color3.new(1, 1, 1); Button.Font = "SourceSansBold"; Button.TextSize = 18; Button.Draggable = true; UICorner.CornerRadius = UDim.new(1, 0)
-         Button.MouseButton1Click:Connect(function()
-            TargetLockEnabled = not TargetLockEnabled
-            Button.BackgroundColor3 = TargetLockEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-            Button.Text = TargetLockEnabled and "ON" or "OFF"
-         end)
-      else
-         if AimbotGuiObj then AimbotGuiObj:Destroy() end
-         TargetLockEnabled = false
-      end
+   Callback = function(v) noclip = v end,
+})
+
+MainTab:CreateToggle({
+   Name = "Godmode",
+   CurrentValue = false,
+   Callback = function(v) godmode = v end,
+})
+
+MainTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Callback = function(v) infiniteJump = v end,
+})
+
+MainTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Callback = function(v)
+        espEnabled = v
+        if v then
+            for _,plr in pairs(Players:GetPlayers()) do
+                createESP(plr)
+            end
+        else
+            removeESP()
+        end
    end,
 })
+
+MainTab:CreateSlider({
+   Name = "Fly Speed",
+   Range = {1, 10},
+   Increment = 1,
+   CurrentValue = 2,
+   Callback = function(v) speed = v end,
+})
+
+MainTab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {16, 150},
+   Increment = 2,
+   CurrentValue = 16,
+   Callback = function(v) walkspeed = v end,
+})
+
+
 
 -- --- ABA SEGURANÇA ---
 local SafetyTab = Window:CreateTab("Segurança", 4483362458)
