@@ -1,201 +1,360 @@
---// DAVI7 MENU
---// Roblox Studio - LocalScript
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- --- UI WINDOW ---
+local Window = Rayfield:CreateWindow({
+   Name = "🎯DAVI7 MENU",
+   LoadingTitle = "DAVI7 MENUS AIM🎯",
+   LoadingSubtitle = "CRIADO POR DAVI7",
+   ConfigurationSaving = { Enabled = false }
+})
+
+local AimTab = Window:CreateTab("Combat (Aim)", 4483362458)
+local VisTab = Window:CreateTab("Visuals (ESP)", 4483345998)
+
+
+-- Variáveis de Controle
+local TPWalkEnabled, TPWalkSpeed = false, 1
+local SpeedBoostActive = false
+local InfiniteJumpEnabled = false
+local AutoRejoinKick, AutoRejoinMorte = false, false
+local LineEspEnabled = false
+local AntiVoidEnabled = false
+local TargetLockEnabled = false
+
+-- --- ABA PRINCIPAL (MOVIMENTAÇÃO) ---
+local MainTab = Window:CreateTab("Principal", 4483362458)
+
+MainTab:CreateSection("Boost de Velocidade")
+
+-- Função Speed-Boost (85 Studs)
+MainTab:CreateToggle({
+   Name = "Speed-Boost 100% Anti-ser-espulso (85 metros)",
+   CurrentValue = false,
+   Callback = function(Value)
+      SpeedBoostActive = Value
+      if SpeedBoostActive then
+         spawn(function()
+            while SpeedBoostActive do
+               local char = game.Players.LocalPlayer.Character
+               local hum = char and char:FindFirstChild("Humanoid")
+               if hum and hum.MoveDirection.Magnitude > 0 then
+                  char:TranslateBy(hum.MoveDirection * (85 * 0.012))
+               end
+               task.wait(0.01)
+            end
+         end)
+      end
+   end,
+})
+
+MainTab:CreateSection("Movimentação Manual")
+
+-- Slider de Velocidade para o TPWalk
+MainTab:CreateSlider({
+   Name = "Ajustar TPWalk (1-4)",
+   Range = {1, 4},
+   Increment = 0.1,
+   CurrentValue = 1,
+   Callback = function(Value) TPWalkSpeed = Value end,
+})
+
+-- Botão de Ativar TPWalk
+MainTab:CreateToggle({
+   Name = "Ativar TPWalk Custom",
+   CurrentValue = false,
+   Callback = function(Value)
+      TPWalkEnabled = Value
+      if TPWalkEnabled then
+         spawn(function()
+            while TPWalkEnabled do
+               local char = game.Players.LocalPlayer.Character
+               local hum = char and char:FindFirstChild("Humanoid")
+               if hum and hum.MoveDirection.Magnitude > 0 then
+                  char:TranslateBy(hum.MoveDirection * (TPWalkSpeed * 0.8))
+               end
+               task.wait(0.01)
+            end
+         end)
+      end
+   end,
+})
+
+MainTab:CreateToggle({
+   Name = "Pulo Infinito",
+   CurrentValue = false,
+   Callback = function(Value) InfiniteJumpEnabled = Value end,
+})
+
+-- --- ABA COMBATE ---
+local CombatTab = Window:CreateTab("Combate", 4483362458)
+
+CombatTab:CreateToggle({
+   Name = "linha + ESP",
+   CurrentValue = false,
+   Callback = function(Value) LineEspEnabled = Value end,
+})
+
+local AimbotGuiObj = nil
+CombatTab:CreateToggle({
+   Name = "Ativar Botão Aimbot",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+         local Button = Instance.new("TextButton", ScreenGui)
+         local UICorner = Instance.new("UICorner", Button)
+         AimbotGuiObj = ScreenGui
+         Button.Size = UDim2.new(0, 70, 0, 70); Button.Position = UDim2.new(0.5, -35, 0.5, -35); Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0); Button.Text = "OFF"; Button.TextColor3 = Color3.new(1, 1, 1); Button.Font = "SourceSansBold"; Button.TextSize = 18; Button.Draggable = true; UICorner.CornerRadius = UDim.new(1, 0)
+         Button.MouseButton1Click:Connect(function()
+            TargetLockEnabled = not TargetLockEnabled
+            Button.BackgroundColor3 = TargetLockEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            Button.Text = TargetLockEnabled and "ON" or "OFF"
+         end)
+      else
+         if AimbotGuiObj then AimbotGuiObj:Destroy() end
+         TargetLockEnabled = false
+      end
+   end,
+})
+
+-- --- ABA SEGURANÇA ---
+local SafetyTab = Window:CreateTab("Segurança", 4483362458)
+
+local SubirAntiVoidGui = nil
+SafetyTab:CreateToggle({
+   Name = "Anti-Void Manual",
+   CurrentValue = false,
+   Callback = function(Value)
+      AntiVoidEnabled = Value
+      if not Value and SubirAntiVoidGui then SubirAntiVoidGui:Destroy() SubirAntiVoidGui = nil end
+      if Value then
+         spawn(function()
+            while AntiVoidEnabled do
+               local root = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+               if root and root.Position.Y < -60 then
+                  root.Velocity = Vector3.new(0, 0, 0)
+                  if not SubirAntiVoidGui then
+                     local sg = Instance.new("ScreenGui", game.CoreGui); local btn = Instance.new("TextButton", sg); SubirAntiVoidGui = sg
+                     btn.Size = UDim2.new(0, 150, 0, 60); btn.Position = UDim2.new(0.5, -75, 0.7, 0); btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100); btn.Text = "SAIR DO VOID"; btn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
+                     btn.MouseButton1Down:Connect(function() _G.VoidHold = true while _G.VoidHold and root and AntiVoidEnabled do root.Velocity = Vector3.new(0, 0, 0); root.CFrame = root.CFrame + Vector3.new(0, 3.5, 0); task.wait(0.02) end end)
+                     btn.MouseButton1Up:Connect(function() _G.VoidHold = false end)
+                  end
+               end
+               task.wait(0.1)
+            end
+         end)
+      end
+   end,
+})
+
+-- --- VARIABLEN & DATEN ---
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
 local Settings = {
-    AimEnabled = true,
-    AimKey = Enum.UserInputType.MouseButton2,
-    FOV = 150,
-    Smoothness = 1.0,
-    YOffset = 1.5,
-    VisCheck = false,
-    TeamCheck = false,
-    AutoSwitch = true,
-    OverrideCam = false,
-    ESPEnabled = true,
-    ESPBoxes = true,
-    ESPTracers = true,
-    ESPInfo = true,
-    ESPDrawFOV = true,
-    ESPMaxDist = 5000,
-    HitboxEnabled = false,
-    HitboxSize = 10,
-    HitboxTransparency = 0.6,
-    Notifications = true,
+    -- Combat (Aimbot)
+    AimbotEnabled = false,
+    SilentAim = false, -- Schüsse treffen eher ohne direktes Zielen
+    Smoothness = 0.5,
+    AimbotPart = "Head",
+    AimbotFOV = 150,
+    ShowFOV = true,
+    FOVColor = Color3.fromRGB(255, 0, 0),
+    FOVThickness = 1,
+    
+    -- Visuals (ESP)
+    ESPEnabled = false,
+    ESPBoxes = false,
+    ESPNames = false,
+    ESPTracer = false, -- Snaplines / Tracker
+    ESPColor = Color3.fromRGB(255, 0, 0),
+    TracerOrigin = "Bottom", -- "Mouse" oder "Bottom"
+    
+    -- Warnings
+    BackWarning = false, -- "Enemy Behind You"
 }
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "DAVI7_MENU"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+-- --- DRAWING SETUP ---
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Filled = false
+FOVCircle.Transparency = 1
+FOVCircle.Visible = false
 
-local main = Instance.new("Frame")
-main.Size = UDim2.fromOffset(310, 440)
-main.Position = UDim2.new(0.5, -155, 0.5, -220)
-main.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = true
-main.Parent = gui
+local WarningText = Drawing.new("Text")
+WarningText.Visible = false
+WarningText.Center = true
+WarningText.Size = 30
+WarningText.Outline = true
+WarningText.Font = 2
+WarningText.Color = Color3.new(1, 0, 0)
+WarningText.Text = "⚠️ ENEMY BEHIND YOU ⚠️"
 
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 45)
-title.BackgroundColor3 = Color3.fromRGB(190, 25, 45)
-title.Text = "DAVI7 MENU"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.Parent = main
-Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
+-- --- AIMBOT SEKTION ---
+AimTab:CreateSection("Aimbot Settings")
 
-local scroll = Instance.new("ScrollingFrame")
-scroll.Position = UDim2.fromOffset(8, 53)
-scroll.Size = UDim2.new(1, -16, 1, -61)
-scroll.BackgroundTransparency = 1
-scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 4
-scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-scroll.CanvasSize = UDim2.new()
-scroll.Parent = main
+AimTab:CreateToggle({
+   Name = "Aimbot",
+   CurrentValue = false,
+   Callback = function(v) Settings.AimbotEnabled = v end
+})
 
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 6)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Parent = scroll
+AimTab:CreateSlider({
+   Name = "Smoothness / Strength",
+   Range = {0, 1}, Increment = 0.1, CurrentValue = 0.5,
+   Callback = function(v) Settings.Smoothness = v end
+})
 
-local function section(name)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -5, 0, 28)
-    label.BackgroundTransparency = 1
-    label.Text = "  " .. name
-    label.TextColor3 = Color3.fromRGB(255, 75, 90)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 14
-    label.Parent = scroll
-end
+AimTab:CreateDropdown({
+   Name = "Target Bone",
+   Options = {"Head", "UpperTorso", "HumanoidRootPart"},
+   CurrentOption = "Head",
+   Callback = function(v) Settings.AimbotPart = v end
+})
 
-local function toggle(name, key)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -5, 0, 34)
-    button.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.Font = Enum.Font.Gotham
-    button.TextSize = 13
-    button.Parent = scroll
-    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+AimTab:CreateSection("FOV Customization")
 
-    local function refresh()
-        button.Text = name .. ": " ..
-            (Settings[key] and "ON" or "OFF")
-    end
+AimTab:CreateToggle({
+   Name = "Aimbot FOV ",
+   CurrentValue = true,
+   Callback = function(v) Settings.ShowFOV = v end
+})
 
-    refresh()
+AimTab:CreateSlider({
+   Name = "FOV Radius",
+   Range = {50, 800}, Increment = 10, CurrentValue = 150,
+   Callback = function(v) Settings.AimbotFOV = v end
+})
 
-    button.Activated:Connect(function()
-        Settings[key] = not Settings[key]
-        refresh()
+AimTab:CreateColorPicker({
+    Name = "FOV Color",
+    Color = Color3.fromRGB(255, 0, 0),
+    Callback = function(v) Settings.FOVColor = v end
+})
+
+-- --- VISUALS SEKTION ---
+VisTab:CreateSection("ESP Options")
+
+VisTab:CreateToggle({
+   Name = " ESP ",
+   CurrentValue = false,
+   Callback = function(v) Settings.ESPEnabled = v end
+})
+
+VisTab:CreateToggle({
+   Name = " Boxes ",
+   CurrentValue = false,
+   Callback = function(v) Settings.ESPBoxes = v end
+})
+
+VisTab:CreateToggle({
+   Name = "Snaplines / Tracker",
+   CurrentValue = false,
+   Callback = function(v) Settings.ESPTracer = v end
+})
+
+VisTab:CreateToggle({
+   Name = "Back-Warning (!)",
+   CurrentValue = false,
+   Callback = function(v) Settings.BackWarning = v end
+})
+
+VisTab:CreateColorPicker({
+    Name = "Visual Color",
+    Color = Color3.fromRGB(255, 0, 0),
+    Callback = function(v) Settings.ESPColor = v end
+})
+
+-- --- CORE LOGIK ---
+
+local function CreatePlayerVisuals(Player)
+    local Box = Drawing.new("Square")
+    local Line = Drawing.new("Line")
+    
+    RunService.RenderStepped:Connect(function()
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character:FindFirstChild("Humanoid") and Player.Character.Humanoid.Health > 0 then
+            local Root = Player.Character.HumanoidRootPart
+            local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
+            
+            -- Box ESP
+            if OnScreen and Settings.ESPEnabled and Settings.ESPBoxes then
+                local Size = (Camera:WorldToViewportPoint(Root.Position - Vector3.new(0, 3, 0)).Y - Camera:WorldToViewportPoint(Root.Position + Vector3.new(0, 2.6, 0)).Y)
+                Box.Visible = true
+                Box.Size = Vector2.new(Size * 0.7, Size)
+                Box.Position = Vector2.new(Pos.X - Box.Size.X/2, Pos.Y - Box.Size.Y/2)
+                Box.Color = Settings.ESPColor
+            else
+                Box.Visible = false
+            end
+
+            -- Tracker / Snaplines
+            if OnScreen and Settings.ESPEnabled and Settings.ESPTracer then
+                Line.Visible = true
+                Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                Line.To = Vector2.new(Pos.X, Pos.Y)
+                Line.Color = Settings.ESPColor
+            else
+                Line.Visible = false
+            end
+        else
+            Box.Visible = false
+            Line.Visible = false
+        end
     end)
 end
 
-local function value(name, key, step, min, max)
-    local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, -5, 0, 36)
-    row.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
-    row.Parent = scroll
-    Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -85, 1, 0)
-    label.Position = UDim2.fromOffset(8, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 12
-    label.Parent = row
-
-    local minus = Instance.new("TextButton")
-    minus.Size = UDim2.fromOffset(28, 28)
-    minus.Position = UDim2.new(1, -64, 0, 4)
-    minus.Text = "-"
-    minus.Parent = row
-
-    local plus = Instance.new("TextButton")
-    plus.Size = UDim2.fromOffset(28, 28)
-    plus.Position = UDim2.new(1, -32, 0, 4)
-    plus.Text = "+"
-    plus.Parent = row
-
-    for _, b in ipairs({minus, plus}) do
-        b.BackgroundColor3 = Color3.fromRGB(190, 25, 45)
-        b.TextColor3 = Color3.new(1, 1, 1)
-        b.Font = Enum.Font.GothamBold
-        b.TextSize = 16
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
+-- --- AIMBOT & WARNING UPDATES ---
+RunService.RenderStepped:Connect(function()
+    -- FOV Update
+    FOVCircle.Visible = Settings.ShowFOV
+    FOVCircle.Radius = Settings.AimbotFOV
+    FOVCircle.Position = UserInputService:GetMouseLocation()
+    FOVCircle.Color = Settings.FOVColor
+    
+    -- Aimbot Lock
+    if Settings.AimbotEnabled and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        local Target = nil
+        local ShortestDist = Settings.AimbotFOV
+        
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild(Settings.AimbotPart) then
+                local Pos, OnScreen = Camera:WorldToViewportPoint(v.Character[Settings.AimbotPart].Position)
+                if OnScreen then
+                    local Dist = (Vector2.new(Pos.X, Pos.Y) - UserInputService:GetMouseLocation()).Magnitude
+                    if Dist < ShortestDist then
+                        Target = v
+                        ShortestDist = Dist
+                    end
+                end
+            end
+        end
+        
+        if Target then
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, Target.Character[Settings.AimbotPart].Position), (1 - Settings.Smoothness))
+        end
     end
 
-    local function refresh()
-        label.Text = name .. ": " .. tostring(Settings[key])
+    -- Warning Update
+    local ShowWarning = false
+    if Settings.BackWarning then
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local RelPos = Camera.CFrame:PointToObjectSpace(v.Character.HumanoidRootPart.Position)
+                if RelPos.Z > 0 and (Camera.CFrame.Position - v.Character.HumanoidRootPart.Position).Magnitude < 50 then
+                    ShowWarning = true
+                end
+            end
+        end
     end
-
-    minus.Activated:Connect(function()
-        Settings[key] = math.max(min, math.round(
-            (Settings[key] - step) * 100) / 100)
-        refresh()
-    end)
-
-    plus.Activated:Connect(function()
-        Settings[key] = math.min(max, math.round(
-            (Settings[key] + step) * 100) / 100)
-        refresh()
-    end)
-
-    refresh()
-end
-
-section("AIM SETTINGS")
-toggle("Aim Enabled", "AimEnabled")
-value("FOV", "FOV", 10, 10, 500)
-value("Smoothness", "Smoothness", 0.1, 0.1, 5)
-value("Y Offset", "YOffset", 0.1, -5, 5)
-toggle("Visibility Check", "VisCheck")
-toggle("Team Check", "TeamCheck")
-toggle("Auto Switch", "AutoSwitch")
-toggle("Override Camera", "OverrideCam")
-
-section("ESP SETTINGS")
-toggle("ESP Enabled", "ESPEnabled")
-toggle("ESP Boxes", "ESPBoxes")
-toggle("ESP Tracers", "ESPTracers")
-toggle("ESP Info", "ESPInfo")
-toggle("ESP Draw FOV", "ESPDrawFOV")
-value("ESP Max Distance", "ESPMaxDist", 100, 100, 5000)
-
-section("HITBOX SETTINGS")
-toggle("Hitbox Enabled", "HitboxEnabled")
-value("Hitbox Size", "HitboxSize", 1, 1, 30)
-value("Hitbox Transparency", "HitboxTransparency", 0.1, 0, 1)
-
-section("GENERAL")
-toggle("Notifications", "Notifications")
-
-local hint = Instance.new("TextLabel")
-hint.Size = UDim2.new(1, -5, 0, 30)
-hint.BackgroundTransparency = 1
-hint.Text = "RightShift = Mostrar/Ocultar"
-hint.TextColor3 = Color3.fromRGB(180, 180, 190)
-hint.Font = Enum.Font.Gotham
-hint.TextSize = 11
-hint.Parent = scroll
-
-UIS.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.RightShift then
-        main.Visible = not main.Visible
-    end
+    WarningText.Visible = ShowWarning
+    WarningText.Position = Vector2.new(Camera.ViewportSize.X / 2, 150)
 end)
+
+-- Initialisierung für Spieler
+for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then CreatePlayerVisuals(p) end end
+Players.PlayerAdded:Connect(CreatePlayerVisuals)
+
+Rayfield:Notify({Title = "DAVI7 MENU", Content = "DAVI7 MENU ABERTO COM SUCESSO!", Duration = 4})
