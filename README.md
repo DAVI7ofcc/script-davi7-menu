@@ -2,8 +2,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- --- UI WINDOW ---
 local Window = Rayfield:CreateWindow({
-   Name = "🎯DAVI7 MENU",
-   LoadingTitle = "DAVI7 MENUS AIM🎯",
+   Name = "🎯DAVI7 Internal",
+   LoadingTitle = "DAVI7 AIM🎯",
    LoadingSubtitle = "CRIADO POR DAVI7",
    ConfigurationSaving = { Enabled = false }
 })
@@ -568,4 +568,4 @@ end)
 for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then CreatePlayerVisuals(p) end end
 Players.PlayerAdded:Connect(CreatePlayerVisuals)
 
-Rayfield:Notify({Title = "DAVI7 MENU", Content = "DAVI7 MENU ABERTO COM SUCESSO!", Duration = 4})
+Rayfield:Notify({Title = "DAVI7 Interno", Content = "DAVI7 INTERNAL ABERTO COM SUCESSO!", Duration = 3})
