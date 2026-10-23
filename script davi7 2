@@ -570,11 +570,23 @@ Players.PlayerAdded:Connect(CreatePlayerVisuals)
 
 Rayfield:Notify({Title = "DAVI7 Interno", Content = "DAVI7 INTERNAL ABERTO COM SUCESSO!", Duration = 3})
 
--- ========================================================
--- 1. MINI TELA FLUTUANTE E MÓVEL (KEYBIND LIST)
--- ========================================================
+-- Serviços Globais
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
+-- Garantindo a existência da tabela global Settings
+getgenv().Settings = getgenv().Settings or {
+    ESPEnabled = false,
+    ESPBoxes = false,
+    ESPTracer = false,
+    BackWarning = false,
+    ESPColor = Color3.fromRGB(255, 0, 0)
+}
+
+-- ========================================================
+-- 1. MINI TELA FLUTUANTE (KEYBIND / STATUS LIST)
+-- ========================================================
 if CoreGui:FindFirstChild("RayfieldKeybindHUD") then
     CoreGui.RayfieldKeybindHUD:Destroy()
 end
@@ -604,7 +616,7 @@ UIStroke.Parent = Frame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 25)
 Title.BackgroundTransparency = 1
-Title.Text = "  Binds 🌠"
+Title.Text = "  Status das Funções"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
@@ -632,22 +644,56 @@ local NoclipText  = CreateStatusLabel("Noclip: DESLIGADO", 100)
 local InfJumpText = CreateStatusLabel("Inf Jump: DESLIGADO", 124)
 local FlyText     = CreateStatusLabel("Fly: DESLIGADO", 148)
 
-local function UpdateHUD()
-    AimbotText.Text = Settings.AimbotEnabled and "[M2] Aimbot: LIGADO" or "[M2] Aimbot: DESLIGADO"
-    AimbotText.TextColor3 = Settings.AimbotEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+local aimbotHolding = false
 
-    ESPText.Text = Settings.ESPEnabled and "ESP: LIGADO" or "ESP: DESLIGADO"
-    ESPText.TextColor3 = Settings.ESPEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+-- Detecção do M2 para o Aimbot
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aimbotHolding = true
+    end
+end)
 
-    GodText.Text = Settings.GodmodeEnabled and "Godmode: LIGADO" or "Godmode: DESLIGADO"
-    GodText.TextColor3 = Settings.GodmodeEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+UIS.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aimbotHolding = false
+    end
+end)
 
-    NoclipText.Text = Settings.NoclipEnabled and "Noclip: LIGADO" or "Noclip: DESLIGADO"
-    NoclipText.TextColor3 = Settings.NoclipEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+-- ========================================================
+-- 2. LOOP DE MONITORAMENTO EM TEMPO REAL
+-- ========================================================
+task.spawn(function()
+    while task.wait(0.1) do
+        -- Acessa a tabela Settings global ou local
+        local st = getgenv().Settings or Settings or {}
 
-    InfJumpText.Text = Settings.InfJumpEnabled and "Inf Jump: LIGADO" or "Inf Jump: DESLIGADO"
-    InfJumpText.TextColor3 = Settings.InfJumpEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+        -- 1. Aimbot (Segurando M2)
+        AimbotText.Text = aimbotHolding and "[M2] Aimbot: LIGADO" or "[M2] Aimbot: DESLIGADO"
+        AimbotText.TextColor3 = aimbotHolding and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
 
-    FlyText.Text = Settings.FlyEnabled and "Fly: LIGADO" or "Fly: DESLIGADO"
-    FlyText.TextColor3 = Settings.FlyEnabled and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
-end
+        -- 2. ESP (Detecta ESP, Boxes, Tracer ou BackWarning)
+        local isESPActive = (st.ESPEnabled == true) or (st.ESPBoxes == true) or (st.ESPTracer == true) or (st.BackWarning == true)
+        ESPText.Text = isESPActive and "ESP: LIGADO" or "ESP: DESLIGADO"
+        ESPText.TextColor3 = isESPActive and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+
+        -- 3. Godmode
+        local isGod = (st.Godmode == true) or (getgenv().godmode == true) or (godmode == true)
+        GodText.Text = isGod and "Godmode: LIGADO" or "Godmode: DESLIGADO"
+        GodText.TextColor3 = isGod and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+
+        -- 4. Noclip
+        local isNoclip = (st.Noclip == true) or (getgenv().noclip == true) or (noclip == true)
+        NoclipText.Text = isNoclip and "Noclip: LIGADO" or "Noclip: DESLIGADO"
+        NoclipText.TextColor3 = isNoclip and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+
+        -- 5. Inf Jump
+        local isInfJump = (st.InfiniteJump == true) or (getgenv().infiniteJump == true) or (infiniteJump == true)
+        InfJumpText.Text = isInfJump and "Inf Jump: LIGADO" or "Inf Jump: DESLIGADO"
+        InfJumpText.TextColor3 = isInfJump and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+
+        -- 6. Fly
+        local isFly = (st.Fly == true) or (getgenv().flying == true) or (flying == true)
+        FlyText.Text = isFly and "Fly: LIGADO" or "Fly: DESLIGADO"
+        FlyText.TextColor3 = isFly and Color3.fromRGB(50, 220, 50) or Color3.fromRGB(200, 50, 50)
+    en
